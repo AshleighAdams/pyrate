@@ -1,7 +1,7 @@
 *.py[cod]
-
+__pycache__
 *.so
-
+*.o
 *.egg
 *.egg-info
 dist
@@ -15,11 +15,9 @@ develop-eggs
 .installed.cfg
 lib
 lib64
-
 pip-log.txt
-
-.coverage
-.tox
-nosetests.xml
-
 .sublime*
+.project
+.cproject
+.tags*
+script/*
