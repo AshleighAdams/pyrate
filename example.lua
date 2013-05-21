@@ -26,6 +26,7 @@ print('Waiting for thread to finish ...')
 -- Threads can handle only one function at a time.
 -- Since the thread is busy, we have to wait until the previous function is done.
 -- This is an indirect t:join, but without any values retrieved from the thread channel.
+-- You may pass additional parameters to the t:run method; they are used as parameters for the function you've passed along.
 t:run(function(a, b, c)
 	thread.sleep(1000)
 	print('Task #3 done')
@@ -36,8 +37,10 @@ print('Waiting for results ...')
 
 -- Even though there are results ready to be retrieved,
 -- we have to wait until the thread context is unlocked.
+-- Passing 3 as parameter, because I want the first 3 available.
 print(t:join(3))
 
 -- The previous t:join already waited for the 3rd function to finish,
 -- so no waiting to do here.
+-- t:join without any parameters grabs every available result.
 print(t:join())

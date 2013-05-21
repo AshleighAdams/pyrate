@@ -13,3 +13,5 @@ Small threading library that supports channel-like communication between Lua sta
  - Copy the `pyrate.so` into your `LUA_CPATH`
  - Done
 
+## Note
+I've tested this on Lua 5.1 only. Good luck with any other version.
