@@ -10,5 +10,5 @@ Small threading library that supports channel-like communication between Lua sta
 ## How to build and install?
  - Clone repository
  - Run `make`
- - Copy the `pyrate.so` into you `LUA_CPATH`
+ - Copy the `pyrate.so` into your `LUA_CPATH`
  - Done
