@@ -1,4 +1,4 @@
-require 'pyrate'
+require('pyrate')
 
 -- Create a new thread/channel
 local t = thread.create()
