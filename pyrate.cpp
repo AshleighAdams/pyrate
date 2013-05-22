@@ -115,6 +115,7 @@ static int lua_thread_join(lua_State* state){
  */
 static void lua_thread_call(lua_thread_control* usrtc, int params){
 	lua_call(usrtc->thread_state, params, LUA_MULTRET);
+
 	usrtc->m.unlock();
 }
 
@@ -137,12 +138,10 @@ static int lua_thread_run(lua_State* state){
 				usrtc->t.join();
 			}
 
-			for(int i = 0; i < npar - 1; i++){
-				lua_pushvalue(state, 2 + i);
-			}
-			lua_xmove(state, usrtc->thread_state, npar - 1);
+			lua_pushvalue(state, 2);
+			lua_xmove(state, usrtc->thread_state, 1);
 
-			usrtc->t = thread(lua_thread_call, usrtc, npar - 2);
+			usrtc->t = thread(lua_thread_call, usrtc, 0);
 		}else{
 			lua_pushstring(state, "Thread is uninitialized");
 			lua_error(state);
@@ -174,6 +173,10 @@ static int lua_thread_sleep(lua_State* state){
  * Used when loaded via 'require'.
  */
 extern "C" int luaopen_pyrate(lua_State* state){
+	lua_pushstring(state, "__threads");
+	lua_newtable(state);
+	lua_rawset(state, LUA_GLOBALSINDEX);
+
 	lua_pushstring(state, "thread");
 	lua_newtable(state);
 
