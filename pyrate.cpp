@@ -220,18 +220,23 @@ extern "C" int luaopen_pyrate(lua_State* state){
 
 	lua_pushstring(state, "thread");
 	lua_newtable(state);
+
 	lua_pushstring(state, "create");
 	lua_pushcfunction(state, &lua_thread_create);
 	lua_rawset(state, -3);
+
 	lua_pushstring(state, "join");
 	lua_pushcfunction(state, &lua_thread_join);
 	lua_rawset(state, -3);
+
 	lua_pushstring(state, "run");
 	lua_pushcfunction(state, &lua_thread_run);
 	lua_rawset(state, -3);
+
 	lua_pushstring(state, "sleep");
 	lua_pushcfunction(state, &lua_thread_sleep);
 	lua_rawset(state, -3);
+
 	lua_rawset(state, LUA_GLOBALSINDEX);
 
 	return 0;
