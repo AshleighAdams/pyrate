@@ -51,7 +51,7 @@ static void lua_copyvalues(lua_State* source_state, int num, lua_State* target_s
 		/* on source_state */
 		lua_pushlightuserdata(source_state, target_state); 	// push target state pointer (field)
 		lua_pushvalue(source_state, idx_current); 		// push value
-		lua_rawset(source_state, -3); 						// rawset(__threads, field, value), consumes both
+		lua_rawset(source_state, -3); 					// rawset(__threads, field, value), consumes both
 
 		/* on target_state */
 		lua_pushlightuserdata(target_state, target_state); 	// push target state pointer (field)
@@ -130,13 +130,11 @@ static int lua_thread_join(lua_State* state){
 				for(int i = 0; i < ret; i++){
 					lua_pushvalue(usrtc->thread_state, 1);
 					lua_remove(usrtc->thread_state, 1);
-					lua_copyvalue(usrtc->thread_state, state);
-					lua_pop(usrtc->thread_state, 1);
 				}
-			}else{
-				lua_copyvalues(usrtc->thread_state, ret, state);
-				lua_pop(usrtc->thread_state, ret);
 			}
+
+			lua_copyvalues(usrtc->thread_state, ret, state);
+			lua_pop(usrtc->thread_state, ret);
 
 			usrtc->m.unlock();
 			return ret;
