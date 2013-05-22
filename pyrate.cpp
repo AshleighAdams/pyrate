@@ -45,7 +45,7 @@ static void lua_copyvalues(lua_State* source_state, int num, lua_State* target_s
 	int idx_current = (idx_last - nelems) + 1; 			// index of the first index to be copied
 
 	lua_load_threadsync(source_state); 					// push __threads
-	int idx_t = lua_load_threadsync(target_state); 		// push __threads
+	int idx_th = lua_load_threadsync(target_state); 	// push __threads
 
 	for(; idx_current <= idx_last; idx_current++){
 		/* on source_state */
@@ -55,11 +55,11 @@ static void lua_copyvalues(lua_State* source_state, int num, lua_State* target_s
 
 		/* on target_state */
 		lua_pushlightuserdata(target_state, target_state); 	// push target state pointer (field)
-		lua_rawget(target_state, idx_t); 				// rawget(__threads, field), replaces field with value
+		lua_rawget(target_state, idx_th); 				// rawget(__threads, field), replaces field with value
 	}
 
 	lua_pop(source_state, 1); 							// pop __threads
-	lua_remove(target_state, idx_t); 					// remove __threads
+	lua_remove(target_state, idx_th); 					// remove __threads
 }
 
 /**
