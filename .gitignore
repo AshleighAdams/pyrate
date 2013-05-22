@@ -20,4 +20,4 @@ pip-log.txt
 .project
 .cproject
 .tags*
-script/*
+devel.lua

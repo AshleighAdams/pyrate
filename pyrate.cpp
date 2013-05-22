@@ -24,62 +24,6 @@ using namespace std;
 using namespace chrono;
 
 /**
- * Load _G.__threads onto the stack and return it's absolute index.
- */
-inline int lua_load_threadsync(lua_State* state){
-	lua_pushstring(state, "__threads"); 				// push field string
-	lua_rawget(state, LUA_GLOBALSINDEX); 				// load __threads from globals
-	return lua_gettop(state); 							// return the index, the __threads table lies at
-}
-
-/**
- * Copy the top-most element from source_state to target_state.
- * Note: This function does not check if there is atleast 1 element on source_state.
- */
-static void lua_copyvalue(lua_State* source_state, lua_State* target_state){
-	/* on source_state */
-	lua_load_threadsync(source_state); 					// push __threads
-	lua_pushlightuserdata(source_state, target_state); 	// push the target state pointer (field)
-	lua_pushvalue(source_state, -3); 					// push copy of the target element (value)
-	lua_rawset(source_state, -3); 						// rawset(__threads, field, value), consumes both field and value
-	lua_pop(source_state, 1); 							// remove __threads
-
-	/* on target_state */
-	lua_load_threadsync(target_state); 					// push __threads
-	lua_pushlightuserdata(target_state, target_state); 	// push the target state pointer (field)
-	lua_rawget(target_state, -2); 						// rawget(__threads, field), replaces field with value
-	lua_remove(target_state, -2); 						// remove __threads
-}
-
-/**
- * Copy num elements from the top of source_state to target_state. Order is kept.
- * Note: If num exceeds the number of elements on source_state, it will copy
- *       only the elements present.
- */
-static void lua_copyvalues(lua_State* source_state, int num, lua_State* target_state){
-	int idx_last = lua_gettop(source_state); 			// index of the last element (item at index 0 is reserved)
-	int nelems = min<int>(num, idx_last); 				// number of transferable elements
-	int idx_current = (idx_last - nelems) + 1; 			// index of the first index to be copied
-
-	lua_load_threadsync(source_state); 					// push __threads
-	int idx_th = lua_load_threadsync(target_state); 	// push __threads
-
-	for(; idx_current <= idx_last; idx_current++){
-		/* on source_state */
-		lua_pushlightuserdata(source_state, target_state); 	// push target state pointer (field)
-		lua_pushvalue(source_state, idx_current); 		// push value
-		lua_rawset(source_state, -3); 					// rawset(__threads, field, value), consumes both
-
-		/* on target_state */
-		lua_pushlightuserdata(target_state, target_state); 	// push target state pointer (field)
-		lua_rawget(target_state, idx_th); 				// rawget(__threads, field), replaces field with value
-	}
-
-	lua_pop(source_state, 1); 							// pop __threads
-	lua_remove(target_state, idx_th); 					// remove __threads
-}
-
-/**
  * Thread controls
  */
 struct lua_thread_control {
@@ -150,8 +94,7 @@ static int lua_thread_join(lua_State* state){
 				}
 			}
 
-			lua_copyvalues(usrtc->thread_state, ret, state);
-			lua_pop(usrtc->thread_state, ret);
+			lua_xmove(usrtc->thread_state, state, ret);
 
 			usrtc->m.unlock();
 			return ret;
@@ -194,10 +137,10 @@ static int lua_thread_run(lua_State* state){
 				usrtc->t.join();
 			}
 
-			lua_pushvalue(state, 2);
-			lua_copyvalue(state, usrtc->thread_state);
-			lua_pop(state, 1);
-			lua_copyvalues(state, npar - 2, usrtc->thread_state);
+			for(int i = 0; i < npar - 1; i++){
+				lua_pushvalue(state, 2 + i);
+			}
+			lua_xmove(state, usrtc->thread_state, npar - 1);
 
 			usrtc->t = thread(lua_thread_call, usrtc, npar - 2);
 		}else{
@@ -231,10 +174,6 @@ static int lua_thread_sleep(lua_State* state){
  * Used when loaded via 'require'.
  */
 extern "C" int luaopen_pyrate(lua_State* state){
-	lua_pushstring(state, "__threads");
-	lua_newtable(state);
-	lua_rawset(state, LUA_GLOBALSINDEX);
-
 	lua_pushstring(state, "thread");
 	lua_newtable(state);
 
