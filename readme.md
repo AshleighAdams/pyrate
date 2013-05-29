@@ -1,8 +1,5 @@
-## Pyrate
-Even hipster pirates love gold and women.
-
 ## What is it?
-Small threading library that supports channel-like communication between Lua states.
+Small threading library for Lua that supports channel-like communication between threads.
 
 ## How does it work?
 [See for yourself](https://github.com/vapourismo/pyrate/blob/master/example.lua)
@@ -13,5 +10,6 @@ Small threading library that supports channel-like communication between Lua sta
  - Copy the `pyrate.so` into your `LUA_CPATH`
  - Done
 
-## Note
-I've tested this on Lua 5.1 only. Good luck with any other version.
+## What is there to know?
+ - Barely usable with default Lua implementation (tested with 5.1.4)
+ - Runs excelent in LuaJIT (tested with 2.0.1)

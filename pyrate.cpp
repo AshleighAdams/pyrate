@@ -138,10 +138,12 @@ static int lua_thread_run(lua_State* state){
 				usrtc->t.join();
 			}
 
-			lua_pushvalue(state, 2);
-			lua_xmove(state, usrtc->thread_state, 1);
+			for(int idx = 2; idx <= npar; idx++){
+				lua_pushvalue(state, idx);
+			}
+			lua_xmove(state, usrtc->thread_state, npar - 1);
 
-			usrtc->t = thread(lua_thread_call, usrtc, 0);
+			usrtc->t = thread(lua_thread_call, usrtc, npar - 2);
 		}else{
 			lua_pushstring(state, "Thread is uninitialized");
 			lua_error(state);
