@@ -217,11 +217,28 @@ void lua_getglobal(lua_State* state){
 }
 #else // Lua 5.2 and above
 void lua_setglobal(lua_State* state){
-	struct NotImplimented {} _;
-	throw _;
+	// stack: name, value
+	lua_rawgeti(state, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+	// stack: name, value, _G
+	lua_pushvalue(state, -3 /* name */);
+	// stack: name, value, _G, name
+	lua_pushvalue(state, -3 /* value */);
+	// stack: name, value, _G, name, value
+	lua_rawset(state, -3 /* _G */);
+	// stack: name, value, _G
+	lua_pop(state, 3);
+	// stack: (empty)
 }
 void lua_getglobal(lua_State* state){
-	struct NotImplimented {} _;
-	throw _;
+	lua_rawgeti(state, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+	// stack: name, _G
+	lua_pushvalue(state, -2 /* name */);
+	// stack: name, _G, name
+	lua_rawget(state, -2 /* _G */);
+	// stack: name, _G, value
+	lua_replace(state, -3 /* value */);
+	// stack: value, _G
+	lua_pop(state, 1);
+	// stack: value
 }
 #endif
