@@ -23,6 +23,10 @@
 using namespace std;
 using namespace chrono;
 
+// mimics the behavoir of `lua_raw(s|g)et(luaState*, LUA_GLOBALSINDEX)` for >= Lua 5.2
+void lua_setglobal(lua_State* state);
+void lua_getglobal(lua_State* state);
+
 /**
  * Thread controls
  */
@@ -62,7 +66,7 @@ static int lua_thread_create(lua_State* state){
 	lua_newtable(state);
 	lua_pushstring(state, "__index");
 	lua_pushstring(state, "thread");
-	lua_rawget(state, LUA_GLOBALSINDEX);
+	lua_getglobal(state);
 	lua_rawset(state, -3);
 
 	lua_setmetatable(state, -2);
@@ -177,7 +181,8 @@ static int lua_thread_sleep(lua_State* state){
 extern "C" int luaopen_pyrate(lua_State* state){
 	lua_pushstring(state, "__threads");
 	lua_newtable(state);
-	lua_rawset(state, LUA_GLOBALSINDEX);
+	lua_setglobal(state);
+	
 
 	lua_pushstring(state, "thread");
 	lua_newtable(state);
@@ -198,7 +203,25 @@ extern "C" int luaopen_pyrate(lua_State* state){
 	lua_pushcfunction(state, &lua_thread_sleep);
 	lua_rawset(state, -3);
 
-	lua_rawset(state, LUA_GLOBALSINDEX);
+	lua_setglobal(state);
 
 	return 0;
 }
+
+#if (LUA_VERSION_NUM <= 501)
+void lua_setglobal(lua_State* state){
+	lua_rawset(state, LUA_GLOBALSINDEX);
+}
+void lua_getglobal(lua_State* state){
+	lua_rawget(state, LUA_GLOBALSINDEX);
+}
+#else // Lua 5.2 and above
+void lua_setglobal(lua_State* state){
+	struct NotImplimented {} _;
+	throw _;
+}
+void lua_getglobal(lua_State* state){
+	struct NotImplimented {} _;
+	throw _;
+}
+#endif
